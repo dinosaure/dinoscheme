@@ -1,0 +1,28 @@
+#ifndef __DINOSCHEME__
+#define __DINOSCHEME__
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdint.h>
+#include <string.h>
+
+#define FAIL  (-1)
+#define OK    (0)
+#define DONE  (+1)
+
+typedef int32_t t_case;
+
+struct s_dono
+{
+  case_t  reg[32];
+  case_t  *mem;
+  int     size;
+  char    *instr;
+};
+typedef struct s_dono t_dono;
+
+t_dono *  init(int size, char *instr);
+int       run(t_dono *dono);
+
+#endif

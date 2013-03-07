@@ -1,0 +1,8 @@
+(define make (lambda (n v) (if [n == 0] nill (. v (make (- n 1) v)))))
+(define foldl (lambda (f a l) (if (empty l) a (foldl f (f a (hd l)) (tl l)))))
+
+(define l (make 30 1))
+(define a -42)
+
+(#num (foldl (lambda (x y) [x + y]) a l))
+(#chr '\n')

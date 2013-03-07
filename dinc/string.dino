@@ -1,0 +1,4 @@
+(define iter (lambda (f l) (if (empty l) () (begin (f (hd l)) (iter f (tl l))))))
+(define #str (lambda (l) (iter (lambda (x) (#chr x)) l)))
+
+(#str "Hello World !\n")

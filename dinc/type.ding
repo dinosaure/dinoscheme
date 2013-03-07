@@ -1,0 +1,7 @@
+(apply
+	(make-closure λf.eb
+		(apply f ())
+		[])
+	(make-closure λx.ea
+		(apply ea[0] x)
+		[f]))

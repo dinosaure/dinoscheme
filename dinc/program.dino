@@ -1,0 +1,18 @@
+(define rev   (lambda (l) (let (f (lambda (a l) (if (empty l) a (f (. (hd l) a) (tl l))))) (f nill l))))
+(define foldl (lambda (f a l) (if (empty l) a (foldl f (f a (hd l)) (tl l)))))
+(define foldr (lambda (f a l) (if (empty l) a (f (hd l) (foldr f a (tl l))))))
+(define iter  (lambda (f l) (if (empty l) () (begin (f (hd l)) (iter f (tl l))))))
+(define fact  (lambda (n) (let (f (lambda (n a) (if [n == 0] a (f [n - 1] [a * n])))) (f n 1))))
+(define #str  (lambda (l) (iter (lambda (x) (#chr x)) l)))
+
+(define u (lambda (x) (begin (#num x) (#str "! = ") (#num (fact x)) (#chr '\n'))))
+(define v (lambda (x y) [x + y]))
+(define w (lambda (x) (begin (#str " + ") (#num x))))
+(define l (list 10 9 8 7 6 5 4 3 2 1))
+
+(iter u (rev l))
+(#chr '\n')
+
+(begin (#num (hd l)) (iter w (tl l)) (#str " = "))
+(#num (foldl v 0 l))
+(#chr '\n')

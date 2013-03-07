@@ -1,0 +1,5 @@
+(define make-ignore (lambda (x) (lambda (n) x)))
+(define f (make-ignore 42))
+
+(#num (f 5))
+(#chr '\n')

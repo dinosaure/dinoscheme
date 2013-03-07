@@ -1,0 +1,4 @@
+(define -- (lambda (x) (- x 1)))
+(define fact (lambda (n) (let (f (lambda (n a) (if (== n 0) a (f (-- n) (* a n))))) (f n 1))))
+(#num (fact 10))
+(#chr '\n')

@@ -1,0 +1,6 @@
+(define rev   (lambda (l) (let (f (lambda (a l) (if (empty l) a (f (. (hd l) a) (tl l))))) (f nill l))))
+(define iter  (lambda (f l) (if (empty l) () (begin (f (hd l)) (iter f (tl l))))))
+(define #str  (lambda (l) (iter (lambda (x) (#chr x)) l)))
+
+(#str (rev "emehcsonid"))
+(#chr '\n')

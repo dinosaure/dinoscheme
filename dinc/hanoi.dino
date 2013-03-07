@@ -1,0 +1,11 @@
+(define iter (lambda (f l) (if (empty l) () (begin (f (hd l)) (iter f (tl l))))))
+(define #str (lambda (l) (iter (lambda (x) (#chr x)) l)))
+
+(define hanoi (lambda (n d a i)
+  (if [n <> 0] (begin
+	  (hanoi [n - 1] d i a)
+	  (#str d) (#str " -> ") (#str a) (#chr '\n')
+	  (hanoi [n - 1] i a d))
+	())))
+
+(hanoi 5 "1" "2" "3")
