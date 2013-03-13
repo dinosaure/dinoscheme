@@ -1,13 +1,13 @@
 CC=				clang
 IDIR=			include
 LDIRS=			
-LFLAGS=			$(LDIRS)
-CFLAGS=			-I $(IDIR) -W -Wextra -Wall -g
+LFLAGS=		$(LDIRS)
+CFLAGS=		-I $(IDIR) -W -Wextra -Wall -g
 RM=				rm -f
 
 NAME=			dini
 
-SRC=			src/main.c \
+SRC=		src/main.c \
 				src/util.c \
 				src/vm.c \
 				src/register.c \
@@ -16,11 +16,11 @@ SRC=			src/main.c \
 				src/memory.c \
 				src/environment.c \
 
-OBJ=			$(SRC:.c=.o)
+OBJ=		$(SRC:.c=.o)
 
 all: $(NAME)
 
-$(NAME):	$(OBJ)
+$(NAME): $(OBJ)
 	@$(CC) $(OBJ) -o $(NAME) $(CFLAGS) $(LFLAGS)
 	@echo " CC	$(OBJ)"
 
