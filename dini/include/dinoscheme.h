@@ -39,7 +39,7 @@ struct pgrm_s
   case_t  registers[SIZE_REGISTER];
 
   /*
-   * STACK 
+   * STACK
    *
    */
 
