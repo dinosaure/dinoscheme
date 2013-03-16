@@ -97,10 +97,6 @@ flip()
 
   i = 0;
 
-#ifdef DEBUG
-  printf("gc:\tflip\n");
-#endif
-
   if (ap != -1)
     ap = copy(ap);
 
