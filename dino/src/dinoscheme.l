@@ -27,7 +27,7 @@
 #define SIZE_CONTAINER  (4)
 #define SIZE_VALUE      (5)
 #define SIZE_STACK      (32)
-#define SIZE_MEMORY     (2048)
+#define SIZE_MEMORY     (4096)
 
 #define SLOT_SIZE       (0)
 #define SLOT_FORWARD    (1)
@@ -127,7 +127,7 @@ EPT   \x17
 
 #ifdef DEBUG
   fprintf(stderr, "ADD\t%d + %d", b, a);
-  dump(stderr, mem, op);
+  dump(stderr, mem, r);
 #endif
 
   return (OK);
@@ -147,8 +147,8 @@ EPT   \x17
   push(dono, r, op);
 
 #ifdef DEBUG
-  fprintf(stderr, "ADD\t%d - %d", b, a);
-  dump(stderr, mem, op);
+  fprintf(stderr, "SUB\t%d - %d", b, a);
+  dump(stderr, mem, r);
 #endif
 
   return (OK);
@@ -168,8 +168,8 @@ EPT   \x17
   push(dono, r, op);
 
 #ifdef DEBUG
-  fprintf(stderr, "ADD\t%d * %d", b, a);
-  dump(stderr, mem, op);
+  fprintf(stderr, "MUL\t%d * %d", b, a);
+  dump(stderr, mem, r);
 #endif
 
   return (OK);
@@ -186,11 +186,11 @@ EPT   \x17
   if (value(dono, b / a, &r) != OK)
     return (FAIL);
 
-  push(dono, r, op);
+  push(dono, r, r);
 
 #ifdef DEBUG
-  fprintf(stderr, "ADD\t%d / %d", b, a);
-  dump(stderr, mem, op);
+  fprintf(stderr, "DIV\t%d / %d", b, a);
+  dump(stderr, mem, r);
 #endif
 
   return (OK);
@@ -210,7 +210,7 @@ EPT   \x17
   push(dono, r, op);
 
 #ifdef DEBUG
-  fprintf(stderr, "ADD\t%d % %d", b, a);
+  fprintf(stderr, "MOD\t%d % %d", b, a);
   dump(stderr, mem, op);
 #endif
 
@@ -325,15 +325,15 @@ EPT   \x17
   t_case    value;
   t_case    frame;
 
-  closure = mem[op + mem[op + SLOT_LCHILD] - 1];
+  value = pop(dono, op);
+  closure = pop(dono, op);
+
   addr = mem[closure + mem[closure + SLOT_FCHILD] + 3];
   size = mem[closure + mem[closure + SLOT_FCHILD] + 2];
 
   if (environment_extend(dono, mem[closure + mem[closure + SLOT_LCHILD] - 0], 1, &ap) != OK)
     return (FAIL);
 
-  value = pop(dono, op);
-  (void) pop(dono, op);
   environment_set(dono, ap, 0, value);
 
   if (container(dono, 3, &frame) != OK)
@@ -347,7 +347,8 @@ EPT   \x17
   push(dono, frame, rs);
 
 #ifdef DEBUG
-  fprintf(stderr, "CALL\t");
+  fprintf(stderr, "CALL:\t");
+  fprintf(stderr, "\t");
   dump(stderr, mem, closure);
   fprintf(stderr, "\t");
   dump(stderr, mem, ap);
@@ -359,7 +360,7 @@ EPT   \x17
 
   fseek(yyin, addr, SEEK_SET);
   ep = ap;
-  ap = -1;
+  ap = (-1);
   pc = addr;
 
   if (container(dono, size, &op) != OK)
@@ -401,15 +402,89 @@ EPT   \x17
   v = mem[pop(dono, op) + SLOT_VALUE];
 
   if (v == 0)
-    fseek(yyin, pc + get(yytext + 1) + 5, SEEK_SET);
+    fseek(yyin, pc + get(yytext + 1) + 4, SEEK_SET);
   else
-    fseek(yyin, pc + 5, SEEK_SET);
+    fseek(yyin, pc + 4, SEEK_SET);
+
+  pc = (v == 0) ? pc + get(yytext + 1) + 4 : pc + 4;
 
 #ifdef DEBUG
-  fprintf(stderr, "GT\t%d -> %d\n", v, (v == 0) ? pc + get(yytext + 1) + 5 : pc + 5);
+  fprintf(stderr, "GT\t%d -> %d\n", v, pc);
 #endif
 
   yyrestart(yyin);
+}
+
+\x10 {
+  t_case  a;
+  t_case  b;
+  t_case  r;
+
+  a = mem[pop(dono, op) + SLOT_VALUE];
+  b = mem[pop(dono, op) + SLOT_VALUE];
+
+  if (value(dono, (a == b) ? 1 : 0, &r) != OK)
+    return (FAIL);
+
+  push(dono, r, op);
+
+#ifdef DEBUG
+  fprintf(stderr, "EQ:\t%d == %d\n", a, b);
+#endif
+
+  return (OK);
+}
+
+\x11 {
+  t_case  a;
+  t_case  b;
+  t_case  r;
+
+  a = mem[pop(dono, op) + SLOT_VALUE];
+  b = mem[pop(dono, op) + SLOT_VALUE];
+
+  if (value(dono, (a != b) ? 1 : 0, &r) != OK)
+    return (FAIL);
+
+  push(dono, r, op);
+
+#ifdef DEBUG
+  fprintf(stderr, "DF:\t%d != %d\n", a, b);
+#endif
+
+  return (OK);
+}
+
+\x12{CODE}{CODE}{CODE}{CODE} {
+  t_case  size;
+  t_case  closure;
+  t_case  env;
+
+  size = get(yytext + 1);
+
+  if (container(dono, 3, &closure) != OK)
+    return (FAIL);
+
+  if (environment_extend(dono, ep, 1, &env) != OK)
+    return (FAIL);
+
+  environment_set(dono, env, 0, closure);
+
+  mem[closure + SLOT_LCHILD] += 1;
+  mem[closure + mem[closure + SLOT_FCHILD] + 1] = env;
+  mem[closure + mem[closure + SLOT_FCHILD] + 2] = size;
+  mem[closure + mem[closure + SLOT_FCHILD] + 3] = pc + 5;
+
+  push(dono, closure, op);
+
+#ifdef DEBUG
+  fprintf(stderr, "FUR\t");
+  dump(stderr, mem, closure);
+  fprintf(stderr, "\t");
+  dump(stderr, mem, env);
+#endif
+
+  return (OK);
 }
 
 \x13 {
@@ -443,6 +518,81 @@ EPT   \x17
 #endif
 
   yyrestart(yyin);
+
+  return (OK);
+}
+
+\x14 {
+#ifdef DEBUG
+  fprintf(stderr, "NO\n");
+#endif
+
+  return (OK);
+}
+
+\x15{CODE}{CODE}{CODE}{CODE} {
+  t_case  size;
+  t_case  l;
+  t_case  i;
+  t_case  e;
+
+  size = get(yytext + 1);
+
+  if (container(dono, size, &l) != OK)
+    return (FAIL);
+
+  mem[l + SLOT_LCHILD] += size;
+  i = size - 1;
+
+  while (i >= 0)
+    {
+      e = pop(dono, op);
+      mem[l + mem[l + SLOT_LCHILD] - i] = e;
+      i = i - 1;
+    }
+
+  push(dono, l, op);
+
+#ifdef DEBUG
+  fprintf(stderr, "CN:\t");
+  dump(stderr, mem, l);
+#endif
+}
+
+\x16{CODE}{CODE}{CODE}{CODE} {
+  t_case  p;
+  t_case  e;
+
+  p = get(yytext + 1);
+  e = pop(dono, op);
+
+  push(dono, mem[e + mem[e + SLOT_LCHILD] - p], op);
+
+#ifdef DEBUG
+  fprintf(stderr, "ACC:\t");
+  dump(stderr, mem, mem[e + mem[e + SLOT_LCHILD] - p]);
+#endif
+
+  return (OK);
+}
+
+\x17 {
+  t_case  e;
+  t_case  s;
+  t_case  r;
+
+  e = pop(dono, op);
+  s = mem[e + SLOT_LCHILD] - mem[e + SLOT_FCHILD];
+
+  if (value(dono, (s == 0) ? 1 : 0, &r) != OK)
+    return (FAIL);
+
+  push(dono, r, op);
+
+#ifdef DEBUG
+  fprintf(stderr, "EPT:\t");
+  dump(stderr, mem, r);
+#endif
 
   return (OK);
 }
@@ -494,12 +644,12 @@ get(char *instr)
       p = -1;
     }
 
-  r = r + ((unsigned int) instr[i] << (8 * (4 - i - 1)));
+  r = r + ((unsigned char) instr[i] << (8 * (4 - i - 1)));
   i = i + 1;
 
   while (i < 4)
     {
-      r = r + ((unsigned int) instr[i] << (8 * (4 - i - 1)));
+      r = r + ((unsigned char) instr[i] << (8 * (4 - i - 1)));
       i = i + 1;
   }
 
@@ -550,9 +700,11 @@ flip(t_dono *dono)
   scn = ns;
   mp = ns;
 
+  rs = copy(dono, rs);
   ep = copy(dono, ep);
   op = copy(dono, op);
-  rs = copy(dono, rs);
+
+  i = 0;
 
   if (ap != -1)
     ap = copy(dono, ap);
@@ -723,16 +875,17 @@ run(FILE *fd)
   memset(dono->reg, -1, sizeof(t_case));
   mem = malloc(SIZE_MEMORY * sizeof(t_case));
   set_dono(dono);
+  dono->size = SIZE_MEMORY;
 
   if (mem == NULL)
     return (FAIL);
 
-  ts = SIZE_MEMORY - 1;
+  ts = (dono->size / 2) - 1;
   ap = (-1);
   ns = 0;
   mp = 0;
   pc = 0;
-  os = SIZE_MEMORY;
+  os = dono->size / 2;
 
   if (container(dono, 0, &ep) != OK)
     return (FAIL);
