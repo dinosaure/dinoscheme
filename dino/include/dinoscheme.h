@@ -6,18 +6,19 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <string.h>
-#include <fcntl.h>
 
-#define OK    0
-#define FAIL  1
-#define DONE  2
-#define NAN   -1
+#define FAIL  (-1)
+#define OK    (0)
+#define DONE  (+1)
 
-#define SIZE_REGISTER   32
-#define SIZE_STACK      32
-#define SIZE_MEMORY     4096
-#define SIZE_SPACE      (SIZE_MEMORY / 2)
+typedef int32_t t_case;
 
-typedef int32_t case_t;
+struct s_dono
+{
+  t_case  reg[32];
+  t_case  *mem;
+  int     size;
+};
+typedef struct s_dono t_dono;
 
 #endif

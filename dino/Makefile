@@ -1,18 +1,16 @@
 CC=				clang
+CCLEX=		flex
 IDIR=			include
 LDIRS=			
-LFLAGS=			$(LDIRS)
-CFLAGS=			-I $(IDIR) -W -Wextra -Wall -g
+LFLAGS=		$(LDIRS)
+CFLAGS=		-I $(IDIR) -g
 RM=				rm -f
 
 NAME=			dino
 
-SRC=			src/main.c \
-				src/register.c \
-				src/primitive.c \
-				src/util.c \
-				src/memory.c \
-				src/vm.c \
+LEX=			src/dinoscheme.l
+
+SRC=			$(LEX:.l=.c)
 
 OBJ=			$(SRC:.c=.o)
 
@@ -26,8 +24,12 @@ $(NAME):	$(OBJ)
 	@$(CC) -c $< -o $@ $(CFLAGS)
 	@echo " CC	$<"
 
+%.c: %.l
+	@$(CCLEX) -o $@ $<
+	@echo " LX	$<"
+
 clean:
-	@$(RM) $(OBJ)
+	@$(RM) $(SRC:.c=.o) $(LEX:.l=.c)
 	@echo " RM	$(OBJ)"
 
 fclean: clean
@@ -37,3 +39,5 @@ fclean: clean
 re: fclean all
 
 .PHONY: clean fclean re
+
+.PRECIOUS: src/dinoscheme.c

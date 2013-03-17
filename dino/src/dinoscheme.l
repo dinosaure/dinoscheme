@@ -40,7 +40,7 @@
 
 #define mem             (dono->mem)
 
-#define YY_USER_INIT    t_dono *	dono = get_dono()
+#define YY_USER_INIT    t_dono * dono = get_dono()
 #define YY_USER_ACTION  pc = pc + yyleng;
 #define ECHO
 
