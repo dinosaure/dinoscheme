@@ -5,6 +5,18 @@ open Synthesis
 open Operation
 open Opcode
 
+(* Command-line *)
+
+let input = ref stdin
+let output = ref stdout
+let rest = ref []
+
+let usage = "usage " ^ Sys.argv.(0) ^ " input [-o output]"
+
+let arglist = [
+  ("-o", Arg.String (fun s -> output := (open_out s)), ": define output file")
+]
+
 let et = Et.empty
 let ep = Ep.empty
 
@@ -74,17 +86,22 @@ let et = let t = Type.primitive (Type.tarrow Type.tinteger Type.tvoid)
 let et = let t = Type.primitive (Type.tarrow Type.tboolean Type.tvoid)
          in Et.add "#bln" t et
 
+let compilator input output =
+  let a = Lambda.eval ep (Parser.main Lexer.lexer (Lexing.from_channel input)) in
+  let i = try Index.eval a
+          with Failure s -> print_string s; print_newline (); exit 0 in
+  let _ = try Synthesis.eval et i
+          with Failure s -> print_string s; print_newline (); exit 0
+             | Conflict s -> print_string (conflict s); print_newline (); exit 0
+             | Circularity s -> print_string (circularity s); print_newline (); exit 0 in
+  let s = try Operation.eval i
+          with Failure s -> print_string s; print_newline (); exit 0 in
+  let o = try (7 :: (Opcode.word_of_integer s)) @ (Opcode.eval ep [ 6 ] i)
+          with Failure s -> print_string s; print_newline (); exit 0 in
+  List.iter (fun x -> output_byte output x) (Opcode.tail o)
+
 let _ =
-  if Array.length Sys.argv == 2 then
-    let a = Lambda.eval ep (Parser.main Lexer.lexer (Lexing.from_channel (open_in Sys.argv.(1))))
-    in let i = try Index.eval a 
-               with Failure s -> print_string s; print_newline (); exit 0;
-    in let _ = try Synthesis.eval et i
-               with Failure s -> print_string s; print_newline (); exit 0;
-                  | Conflict s -> print_string (conflict s); print_newline (); exit 0;
-                  | Circularity s -> print_string (circularity s); print_newline (); exit 0;
-    in let s = try Operation.eval i
-               with Failure s -> print_string s; print_newline (); exit 0
-    in let o = try (7 :: (Opcode.word_of_integer s)) @ (Opcode.eval ep [6] i)
-               with Failure s -> print_string s; print_newline (); exit 0;
-    in List.iter (fun x -> output_byte stdout x) (Opcode.tail o)
+  try Arg.parse arglist (fun x -> rest := x :: !rest) usage;
+      compilator (if List.length !rest == 0 then !input else (open_in (List.hd !rest))) !output
+  with Failure s -> print_string s; print_newline (); exit 0
+     | Sys_error s -> print_string s; print_newline (); exit 0
