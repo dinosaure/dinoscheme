@@ -1,3 +1,1 @@
-open Ast
-
-val eval: Ast.expression -> int 
+val eval: Index.t -> int 
