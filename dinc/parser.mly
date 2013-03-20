@@ -9,7 +9,7 @@
     in aux [] (String.length s - 1)
 %}
 
-%start <Ast.expression> main
+%start <Ast.t> main
 
 %token EOF
 %token RPA LPA
@@ -35,13 +35,13 @@
 
 expression:
   | RPA LAMBDA a = delimited(RPA, Word+, LPA) c = expression LPA
-  { foldr (fun x -> fun c -> Ast.Lambda (x, c, None)) c a }
+  { foldr (fun x -> fun c -> Ast.Lambda (x, c)) c a }
 
   | RPA LIST l = expression* LPA 
   { foldr (fun x -> fun y -> Ast.List (x, y)) Ast.Nill l }
 
   | RPA LET RPA n = Word c = expression LPA r = expression LPA
-  { Ast.Application (Ast.Lambda (n, r, None), c) }
+  { Ast.Application (Ast.Lambda (n, r), c) }
 
   | RPA IF i = expression a = expression b = expression LPA
   { Ast.Condition (i, a, b) }
@@ -75,10 +75,10 @@ instr: a = instr o = Word b = instr { Ast.Instr [Ast.Word o; a; b] }
 
 define: 
   | RPA DEFINE n = Word c = expression LPA r = main
-  { Ast.Application (Ast.Lambda (n, r, None), c) }
+  { Ast.Application (Ast.Lambda (n, r), c) }
 
   | RPA DEFINE n = Word c = expression LPA
-  { Ast.Application (Ast.Lambda (n, Ast.Null, None), c) }
+  { Ast.Application (Ast.Lambda (n, Ast.Null), c) }
 
 main:
   | i = define EOF { i }

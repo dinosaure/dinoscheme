@@ -1,18 +1,14 @@
-type expression =
-  | Instr of expression list
+type t =
+  | Instr of t list
   | Word of string
   | Character of char
   | Integer of int
   | Real of float
   | Boolean of bool 
-  | Lambda of string * expression * string option
-  | List of expression * expression
-  | Sequence of expression * expression
-  | Condition of expression * expression * expression
+  | Lambda of string * t
+  | List of t * t
+  | Sequence of t * t
+  | Condition of t * t * t
   | Nill
   | Null
-  | Variable of string * int
-  | Application of expression * expression
-  | Primitive of string * expression list
-
-val string_of_ast: expression -> string
+  | Application of t * t
