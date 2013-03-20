@@ -1,0 +1,78 @@
+# Le DinoScheme
+
+Le DinoScheme est un langage informatique compilé (avec le logiciel dinc -
+OCaml) et un interprété à l'aide d'une machine virtuelle (avec le logiciel dini
+- C). Le langage dérive de la syntaxe de Scheme mais qui dispose en plus une
+implémentation du système F dans le compilateur. C'est donc un langage
+fonctionnel qui reste (et restera) basique.
+
+## Compilation
+
+Dépendance:
+  OCaml
+  OCamllex
+  OCamlbuild
+  Menhir
+  Clang
+  GNU Flex
+
+cd dinc && make
+cd dini && make
+cd dino && make
+
+Le compilateur Dinc est un compilateur OCaml basique qui a besoin de OCamllex
+pour le Lexer et Menhir pour le Parser. OCamlbuild est utilisé pour gérer les
+dépendances entres les différents modules qui composent le compilateur.
+Une version futur aura pour dépendance l'API LLVM pour OCaml (dans une autre
+branche ou un autre dossier).
+
+L'interpréteur Dini est une machine virtuelle qui n'a que pour dépendance le
+compilateur Clang. Cette machine virtuelle n'est là que pour titre indicatif -
+c'est une version « propre » de Dino. Vous pouvez l'essayer (cette version est
+stable) sans risque de trou spatio-temporel.
+
+L'interpréteur Dino est une machine virtuelle écrite pour le générateur GNU
+Flex. C'est ce projet qui a pour ambition de s'intégrer à d'autres projets.
+L'ajout d'opcode est plus simple que sur Dini (grâce à GNU Flex), cette version
+n'est pas stable et sera plus sujet à des modifications.
+
+## Objectifs
+
+Un projet avec une grande ambition se doit d'avoir une interface pour intéragir
+avec l'utilisateur. Il existe plusieurs moyens de mettre en place cette
+interface. À l'aide des GUIs mais aussi à l'aide de fichier de configuration où
+même à l'aide de petit langage informatique qui ne sont là que pour offrir un
+modèle d'interaction plus complexe mais plus puissant entre le projet et
+l'homme.
+
+Le DinoScheme a pour objectif d'offrir un langage très basique et très simple à
+modifier au niveau du « core » pour les développeurs voulant ajouter une tel
+interface à leurs projets. L'objectif est donc d'être capable de modifier le
+DinoScheme afin qu'il correspond aux problématiques du projet maître pour le
+définir ainsi comme interface maniable entre le logiciel et l'homme.
+
+Mais le langage doit être capable d'offrir une certaine sécurité pour le
+développeur afin que celui ci n'est pas (ou très peu) à s'occuper d'un
+hypothétique « debug » entre la machine virtuelle et son programme. Ainsi, le
+travail sur ce dépôt n'a que pour ambition d'offrir un langage « safe » pour
+qu'il n'y est que très peu de risque à l'utiliser dans un projet annexe.
+
+## Avenir
+
+Aujourd'hui, le DinoScheme est un projet maintenu par un étudiant Epitech qui se
+voit offrir des soutiens annexes internes à l'école pour atteindre l'objectif
+expliqué plus haut. Ainsi, nous travaillons sur des problématiques génériques à
+l'aide du Laboratoire ACSEL afin d'y prendre profit et les utiliser par la suite
+dans se projet (pour ne citer que TyLLVM ou une gestion plus précise des
+exceptions).
+
+Ces différents travaux indépendants du DinoScheme ont pour ambition d'offrir un
+environnement plus « safe » au développeur. Cet environnement permmettra de
+d'obtenir un langage dont les problématiques liées au « debug » ne s'addressent
+plus aux développeurs qui utiliseront le langage.
+
+## Conclusion
+
+Le projet manque un logo. Vous pouvez envoyer une appréciation, une critique, un
+patch, ou toute autre initiative à cette adresse:
+romain [point] calascibetta [at] epitech [point] eu
