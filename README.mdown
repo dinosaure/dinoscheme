@@ -57,6 +57,25 @@ hypothétique « debug » entre la machine virtuelle et son programme. Ainsi, le
 travail sur ce dépôt n'a que pour ambition d'offrir un langage « safe » pour
 qu'il n'y est que très peu de risque à l'utiliser dans un projet annexe.
 
+## Utilisation
+
+Le langage dérive de Scheme. Je vous réfère au dossier « examples » qui contient
+pas mal d'exemple notamment sur la gestion des chaînes de caractères. Il faut
+utiliser le logiciel Dinc pour compiler un fichier en DinoScheme. Par défaut,
+Dinc lit sur stdin et écrit sur stdout. L'option -o permet de définir un output
+d'écriture et le prochain premier argument est l'input.
+
+Exemple:
+./dinc.native file.dino -o file.dono
+./dinc.native file.dino > file.dono
+./dinc.native < file.dino > file.dono
+
+Dini et Dino sont des interpréteurs qui prennent en paramètre un unique fichier
+compilé à l'aide de Dinc. Il exécute ensuite le code du fichier donné en
+paramètre. Vous pouvez voir le « debug » de ces interpréteurs en ajoutant
+`#define DEBUG` dans le fichier `dinoscheme.h`. Vous aurez sur stderr tout une
+sortie sur les instructions que fait la machine virtuelle.
+
 ## Avenir
 
 Aujourd'hui, le DinoScheme est un projet maintenu par un étudiant Epitech qui se
