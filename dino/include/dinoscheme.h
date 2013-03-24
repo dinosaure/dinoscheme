@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
 
 #define FAIL  (-1)
 #define OK    (0)
