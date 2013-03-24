@@ -147,7 +147,7 @@ EPT   \x17
   push(dono, r, op);
 
 #ifdef DEBUG
-  fprintf(stderr, "SUB\t%d - %d", b, a);
+  fprintf(stderr, "SUB\t%d - %d ", b, a);
   dump(stderr, mem, r);
 #endif
 
@@ -168,7 +168,7 @@ EPT   \x17
   push(dono, r, op);
 
 #ifdef DEBUG
-  fprintf(stderr, "MUL\t%d * %d", b, a);
+  fprintf(stderr, "MUL\t%d * %d ", b, a);
   dump(stderr, mem, r);
 #endif
 
@@ -189,7 +189,7 @@ EPT   \x17
   push(dono, r, r);
 
 #ifdef DEBUG
-  fprintf(stderr, "DIV\t%d / %d", b, a);
+  fprintf(stderr, "DIV\t%d / %d ", b, a);
   dump(stderr, mem, r);
 #endif
 
@@ -210,7 +210,7 @@ EPT   \x17
   push(dono, r, op);
 
 #ifdef DEBUG
-  fprintf(stderr, "MOD\t%d % %d", b, a);
+  fprintf(stderr, "MOD\t%d %% %d ", b, a);
   dump(stderr, mem, op);
 #endif
 
