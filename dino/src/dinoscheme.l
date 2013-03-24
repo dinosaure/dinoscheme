@@ -46,20 +46,20 @@
 
   static t_dono *	dono = NULL;
 
-  static void     dump(FILE *fd, t_case *ptr, int position);
+  static void     dump(FILE *fd, const t_case *ptr, const int position);
   static t_dono * get_dono();
   static void     set_dono(t_dono *new);
-  static t_case   get(char *instr);
-  static t_case   copy(t_dono *dono, t_case old);
+  static t_case   get(const char *instr);
+  static t_case   copy(t_dono *dono, const t_case old);
   static void     flip(t_dono *dono);
-  static int      allocate(t_dono *dono, t_case size, t_case *node);
-  static int      container(t_dono *dono, t_case size, t_case *node);
-  static int      value(t_dono *dono, t_case value, t_case *node);
-  static t_case   environment_get(t_dono *dono, t_case e, t_case v);
-  static void     environment_set(t_dono *dono, t_case e, t_case v, t_case d);
-  static int      environment_extend(t_dono *dono, t_case e, unsigned int s, t_case *node);
-  static void     push(t_dono *dono, t_case value, t_case stack);
-  static t_case   pop(t_dono *dono, t_case stack);
+  static int      allocate(t_dono *dono, const t_case size, t_case *node);
+  static int      container(t_dono *dono, const t_case size, t_case *node);
+  static int      value(t_dono *dono, const t_case value, t_case *node);
+  static t_case   environment_get(const t_dono *dono, const t_case e, const t_case v);
+  static void     environment_set(const t_dono *dono, const t_case e, const t_case v, const t_case d);
+  static int      environment_extend(t_dono *dono, const t_case e, const unsigned int s, t_case *node);
+  static void     push(const t_dono *dono, const t_case value, const t_case stack);
+  static t_case   pop(const t_dono *dono, const t_case stack);
 
 %}
 
@@ -600,7 +600,7 @@ EPT   \x17
 %%
 
 void
-dump(FILE *fd, t_case *ptr, int position)
+dump(FILE *fd, const t_case *ptr, const int position)
 {
   int size;
   int i;
@@ -628,7 +628,7 @@ set_dono(t_dono *new)
 { dono = new; }
 
 static t_case
-get(char *instr)
+get(const char *instr)
 {
   t_case  r;
   int     i;
@@ -640,7 +640,7 @@ get(char *instr)
 
   if ((unsigned char) instr[i] > 127)
     {
-      instr[i] = instr[i] - 128;
+      r = r - (128 << (8 * (4 - i - 1)));
       p = -1;
     }
 
@@ -657,7 +657,7 @@ get(char *instr)
 }
 
 static t_case
-copy(t_dono *dono, t_case old)
+copy(t_dono *dono, const t_case old)
 {
   t_case  addr;
   t_case  size;
@@ -725,7 +725,7 @@ flip(t_dono *dono)
 }
 
 static int
-allocate(t_dono *dono, t_case size, t_case *node)
+allocate(t_dono *dono, const t_case size, t_case *node)
 {
   int i;
 
@@ -753,7 +753,7 @@ allocate(t_dono *dono, t_case size, t_case *node)
 }
 
 static int
-container(t_dono *dono, t_case size, t_case *node)
+container(t_dono *dono, const t_case size, t_case *node)
 {
   if (allocate(dono, SIZE_CONTAINER + size, node) != OK)
     return (FAIL);
@@ -767,7 +767,7 @@ container(t_dono *dono, t_case size, t_case *node)
 }
 
 static int
-value(t_dono *dono, t_case value, t_case *node)
+value(t_dono *dono, const t_case value, t_case *node)
 {
   if (allocate(dono, SIZE_VALUE, node) != OK)
     return (FAIL);
@@ -782,7 +782,7 @@ value(t_dono *dono, t_case value, t_case *node)
 }
 
 static t_case
-environment_get(t_dono *dono, t_case e, t_case v)
+environment_get(const t_dono *dono, const t_case e, const t_case v)
 {
   if (v < 0 || v > mem[e + SLOT_LCHILD] - mem[e + SLOT_FCHILD])
     fprintf(stderr, "Variable out of range\n");
@@ -791,7 +791,7 @@ environment_get(t_dono *dono, t_case e, t_case v)
 }
 
 static void
-environment_set(t_dono *dono, t_case e, t_case v, t_case d)
+environment_set(const t_dono *dono, const t_case e, const t_case v, const t_case d)
 {
   if (v < 0 || v > mem[e + SLOT_LCHILD] - mem[e + SLOT_FCHILD])
     fprintf(stderr, "Variable out of range\n");
@@ -800,24 +800,26 @@ environment_set(t_dono *dono, t_case e, t_case v, t_case d)
 }
 
 static int
-environment_extend(t_dono *dono, t_case e, unsigned int s, t_case *node)
+environment_extend(t_dono *dono, const t_case e, const unsigned int s, t_case *node)
 {
   t_case  old;
+  t_case  ptr;
   t_case  i;
 
-  old = mem[e + SLOT_SIZE] - SIZE_CONTAINER;
+  ptr = e;
+  old = mem[ptr + SLOT_SIZE] - SIZE_CONTAINER;
 
   if (container(dono, old + s, node) != OK)
     return (FAIL);
 
-  if (mem[e + SLOT_FORWARD] != -1)
-    e = mem[e + SLOT_FORWARD];
+  if (mem[ptr + SLOT_FORWARD] != -1)
+    ptr = mem[ptr + SLOT_FORWARD];
 
-  i = mem[e + SLOT_FCHILD];
+  i = mem[ptr + SLOT_FCHILD];
 
-  while (i < mem[e + SLOT_LCHILD])
+  while (i < mem[ptr + SLOT_LCHILD])
     {
-      mem[(*node) + i + 1] = mem[e + i + 1];
+      mem[(*node) + i + 1] = mem[ptr + i + 1];
       i = i + 1;
     }
 
@@ -827,7 +829,7 @@ environment_extend(t_dono *dono, t_case e, unsigned int s, t_case *node)
 }
 
 static void
-push(t_dono *dono, t_case value, t_case stack)
+push(const t_dono *dono, const t_case value, const t_case stack)
 {
   t_case  a;
   t_case  b;
@@ -843,7 +845,7 @@ push(t_dono *dono, t_case value, t_case stack)
 }
 
 static t_case
-pop(t_dono *dono, t_case stack)
+pop(const t_dono *dono, const t_case stack)
 {
   t_case  r;
   t_case  a;
@@ -901,7 +903,7 @@ run(FILE *fd)
 }
 
 int
-main(int ac, char **av)
+main(const int ac, const char **av)
 {
   FILE *  fd;
 
