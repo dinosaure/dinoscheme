@@ -1,9 +1,9 @@
-CC=				clang
+CC=				gcc
 CCLEX=		flex
 IDIR=			include
 LDIRS=			
 LFLAGS=		$(LDIRS)
-CFLAGS=		-I $(IDIR) -g
+CFLAGS=		-O0 -I $(IDIR) -g
 RM=				rm -f
 
 NAME=			dino
