@@ -27,7 +27,9 @@
 #define SIZE_CONTAINER  (4)
 #define SIZE_VALUE      (5)
 #define SIZE_STACK      (32)
-#define SIZE_MEMORY     (4096)
+#define SIZE_MEMORY     (512)
+
+#define ADD_MEMORY      (512)
 
 #define SLOT_SIZE       (0)
 #define SLOT_FORWARD    (1)
@@ -457,31 +459,33 @@ EPT   \x17
 
 \x12{CODE}{CODE}{CODE}{CODE} {
   t_case  size;
-  t_case  closure;
-  t_case  env;
+  t_case  envr;
+  t_case  clos;
 
   size = get(yytext + 1);
 
-  if (container(dono, 3, &closure) != OK)
+  if (container(dono, 3, &ap) != OK)
     return (FAIL);
 
-  if (environment_extend(dono, ep, 1, &env) != OK)
+  push(dono, ap, op);
+  clos = ap;
+  ap = (-1);
+
+  if (environment_extend(dono, ep, 1, &envr) != OK)
     return (FAIL);
 
-  environment_set(dono, env, 0, closure);
+  environment_set(dono, envr, 0, clos);
 
-  mem[closure + SLOT_LCHILD] += 1;
-  mem[closure + mem[closure + SLOT_FCHILD] + 1] = env;
-  mem[closure + mem[closure + SLOT_FCHILD] + 2] = size;
-  mem[closure + mem[closure + SLOT_FCHILD] + 3] = pc + 5;
-
-  push(dono, closure, op);
+  mem[clos + SLOT_LCHILD] += 1;
+  mem[clos + mem[clos + SLOT_FCHILD] + 1] = envr;
+  mem[clos + mem[clos + SLOT_FCHILD] + 2] = size;
+  mem[clos + mem[clos + SLOT_FCHILD] + 3] = pc + 5;
 
 #ifdef DEBUG
   fprintf(stderr, "FUR\t");
-  dump(stderr, mem, closure);
+  dump(stderr, mem, clos);
   fprintf(stderr, "\t");
-  dump(stderr, mem, env);
+  dump(stderr, mem, envr);
 #endif
 
   return (OK);
@@ -493,15 +497,17 @@ EPT   \x17
   t_case  size;
   t_case  value;
 
-  value = pop(dono, op);
-  closure = pop(dono, op);
+  closure = mem[op + mem[op + SLOT_LCHILD] - 1];
   addr = mem[closure + mem[closure + SLOT_FCHILD] + 3];
   size = mem[closure + mem[closure + SLOT_FCHILD] + 2];
 
   if (environment_extend(dono, mem[closure + mem[closure + SLOT_LCHILD] - 0], 1, &ep) != OK)
     return (FAIL);
 
+  value = pop(dono, op);
   environment_set(dono, ep, 0, value);
+  (void) pop(dono, op);
+
   fseek(yyin, addr, SEEK_SET);
   pc = addr;
 
@@ -605,18 +611,34 @@ dump(FILE *fd, const t_case *ptr, const int position)
   int size;
   int i;
 
-  size = ptr[position];
+  size = ptr[position + SLOT_SIZE];
   i = 0;
 
   fprintf(fd, "[ ");
 
   while (i < size)
     {
-      fprintf(fd, "%04x ", ABS(mem[position + i]));
+      fprintf(fd, "%04x ", ABS(ptr[position + i]));
       i = i + 1;
     }
 
   fprintf(fd, "]\n");
+}
+
+void
+dumpmem(FILE *fd, const t_case *ptr, const int start, const int end)
+{
+  int size;
+  int i;
+
+  i = start;
+
+  while (i < end)
+    {
+      fprintf(fd, "%04x: ", i);
+      dump(fd, ptr, i);
+      i = i + ptr[i + SLOT_SIZE];
+    }
 }
 
 static t_dono *
@@ -734,7 +756,7 @@ allocate(t_dono *dono, const t_case size, t_case *node)
 
   if (size + mp > ts)
     {
-      fprintf(stderr, "Memory fail");
+      fprintf(stderr, "Memory fail\n");
       return (FAIL);
     }
 
