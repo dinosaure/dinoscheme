@@ -325,16 +325,16 @@ EPT   \x17
   t_case    value;
   t_case    frame;
 
-  value = pop(dono, op);
-  closure = pop(dono, op);
-
+  closure = mem[op + mem[op + SLOT_LCHILD] - 1];
   addr = mem[closure + mem[closure + SLOT_FCHILD] + 3];
   size = mem[closure + mem[closure + SLOT_FCHILD] + 2];
 
   if (environment_extend(dono, mem[closure + mem[closure + SLOT_LCHILD] - 0], 1, &ap) != OK)
     return (FAIL);
 
+  value = pop(dono, op);
   environment_set(dono, ap, 0, value);
+  closure = pop(dono, op);
 
   if (container(dono, 3, &frame) != OK)
     return (FAIL);
