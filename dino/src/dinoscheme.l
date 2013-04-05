@@ -45,9 +45,7 @@
 #define mem             (dono->mem)
 
 #define YY_USER_INIT    t_dono * dono = get_dono()
-#define YY_USER_ACTION  pc = pc + yyleng; fprintf(stderr, "PC\t%02x\n", pc); \
-
-#define ECHO
+#define YY_USER_ACTION  pc = pc + yyleng;
 
   static t_dono *	dono = NULL;
 
@@ -375,7 +373,6 @@ EPT   \x17
   if (container(dono, size, &op) != OK)
     return (FAIL);
 
-  fprintf(stderr, "GET\t%02x\n", pc);
   yyrestart(yyin);
 
   return (OK);
@@ -779,8 +776,10 @@ copymem(t_dono *dono, const t_case old, t_case *new, t_case *strt)
       size = mem[old + SLOT_SIZE];
       i = 0;
 
+#ifdef DEBUG
       fprintf(stderr, "=> \t");
       dump(stderr, mem, old);
+#endif
 
       while (i < size)
         {
@@ -790,8 +789,10 @@ copymem(t_dono *dono, const t_case old, t_case *new, t_case *strt)
 
       mem[old + SLOT_FORWARD] = addr;
 
+#ifdef DEBUG
       fprintf(stderr, "<= \t");
       dump(stderr, mem, old);
+#endif
 
       (*strt) = (*strt) + size;
 
@@ -836,8 +837,10 @@ flipmem(t_dono *dono)
       temp = new[scan + SLOT_SIZE];
       i = new[scan + SLOT_LCHILD];
 
+#ifdef DEBUG
       fprintf(stderr, "REF\t");
       dump(stderr, new, scan);
+#endif
 
       while (i > new[scan + SLOT_FCHILD])
         {
