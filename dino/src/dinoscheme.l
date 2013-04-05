@@ -13,6 +13,7 @@
 #define NS    (6)
 #define OS    (7)
 #define AP    (8)
+#define BP    (9)
 
 #define pc    (dono->reg[PC])
 #define mp    (dono->reg[MP])
@@ -23,13 +24,14 @@
 #define ns    (dono->reg[NS])
 #define os    (dono->reg[OS])
 #define ap    (dono->reg[AP])
+#define bp    (dono->reg[BP])
 
 #define SIZE_CONTAINER  (4)
 #define SIZE_VALUE      (5)
 #define SIZE_STACK      (32)
-#define SIZE_MEMORY     (512)
+#define SIZE_MEMORY     (1024)
 
-#define ADD_MEMORY      (512)
+#define ADD_MEMORY      (1024)
 
 #define SLOT_SIZE       (0)
 #define SLOT_FORWARD    (1)
@@ -43,7 +45,8 @@
 #define mem             (dono->mem)
 
 #define YY_USER_INIT    t_dono * dono = get_dono()
-#define YY_USER_ACTION  pc = pc + yyleng;
+#define YY_USER_ACTION  pc = pc + yyleng; fprintf(stderr, "PC\t%02x\n", pc); \
+
 #define ECHO
 
   static t_dono *	dono = NULL;
@@ -54,12 +57,13 @@
   static t_case   get(const char *instr);
   static t_case   copy(t_dono *dono, const t_case old);
   static void     flip(t_dono *dono);
+  static int      flipmem(t_dono *dono);
   static int      allocate(t_dono *dono, const t_case size, t_case *node);
   static int      container(t_dono *dono, const t_case size, t_case *node);
   static int      value(t_dono *dono, const t_case value, t_case *node);
   static t_case   environment_get(const t_dono *dono, const t_case e, const t_case v);
   static void     environment_set(const t_dono *dono, const t_case e, const t_case v, const t_case d);
-  static int      environment_extend(t_dono *dono, const t_case e, const unsigned int s, t_case *node);
+  static int      environment_extend(t_dono *dono, const t_case *e, const unsigned int s, t_case *node);
   static void     push(const t_dono *dono, const t_case value, const t_case stack);
   static t_case   pop(const t_dono *dono, const t_case stack);
 
@@ -331,7 +335,9 @@ EPT   \x17
   addr = mem[closure + mem[closure + SLOT_FCHILD] + 3];
   size = mem[closure + mem[closure + SLOT_FCHILD] + 2];
 
-  if (environment_extend(dono, mem[closure + mem[closure + SLOT_LCHILD] - 0], 1, &ap) != OK)
+  bp = mem[closure + mem[closure + SLOT_LCHILD] - 0];
+
+  if (environment_extend(dono, &bp, 1, &ap) != OK)
     return (FAIL);
 
   value = pop(dono, op);
@@ -349,13 +355,13 @@ EPT   \x17
   push(dono, frame, rs);
 
 #ifdef DEBUG
-  fprintf(stderr, "CALL:\t");
+  fprintf(stderr, "CALL\t");
   fprintf(stderr, "\t");
   dump(stderr, mem, closure);
   fprintf(stderr, "\t");
   dump(stderr, mem, ap);
   fprintf(stderr, "\t");
-  dump(stderr, mem, mem[closure + mem[closure + SLOT_LCHILD] - 0]);
+  dump(stderr, mem, bp);
   fprintf(stderr, "\t");
   dump(stderr, mem, frame);
 #endif
@@ -363,11 +369,13 @@ EPT   \x17
   fseek(yyin, addr, SEEK_SET);
   ep = ap;
   ap = (-1);
+  bp = (-1);
   pc = addr;
 
   if (container(dono, size, &op) != OK)
     return (FAIL);
 
+  fprintf(stderr, "GET\t%02x\n", pc);
   yyrestart(yyin);
 
   return (OK);
@@ -471,7 +479,7 @@ EPT   \x17
   clos = ap;
   ap = (-1);
 
-  if (environment_extend(dono, ep, 1, &envr) != OK)
+  if (environment_extend(dono, &ep, 1, &envr) != OK)
     return (FAIL);
 
   environment_set(dono, envr, 0, clos);
@@ -501,7 +509,9 @@ EPT   \x17
   addr = mem[closure + mem[closure + SLOT_FCHILD] + 3];
   size = mem[closure + mem[closure + SLOT_FCHILD] + 2];
 
-  if (environment_extend(dono, mem[closure + mem[closure + SLOT_LCHILD] - 0], 1, &ep) != OK)
+  bp = mem[closure + mem[closure + SLOT_LCHILD] - 0];
+
+  if (environment_extend(dono, &bp, 1, &ep) != OK)
     return (FAIL);
 
   value = pop(dono, op);
@@ -510,6 +520,7 @@ EPT   \x17
 
   fseek(yyin, addr, SEEK_SET);
   pc = addr;
+  bp = (-1);
 
   if (container(dono, size, &op) != OK)
     return (FAIL);
@@ -714,6 +725,10 @@ flip(t_dono *dono)
   t_case  scn;
   int     i;
 
+#ifdef DEBUG
+  fprintf(stderr, "FLIP\n");
+#endif
+
   tmp = os;
   os = ns;
   ns = tmp;
@@ -730,6 +745,8 @@ flip(t_dono *dono)
 
   if (ap != -1)
     ap = copy(dono, ap);
+  if (bp != -1)
+    bp = copy(dono, bp);
 
   while (scn < mp)
     {
@@ -746,6 +763,111 @@ flip(t_dono *dono)
     }
 }
 
+static t_case
+copymem(t_dono *dono, const t_case old, t_case *new, t_case *strt)
+{
+  t_case  addr;
+  t_case  size;
+  int     i;
+
+  if (mem[old + SLOT_FORWARD] >= 0
+      && mem[old + SLOT_FORWARD] <= (*strt))
+    return (mem[old + SLOT_FORWARD]);
+  else
+    {
+      addr = (*strt);
+      size = mem[old + SLOT_SIZE];
+      i = 0;
+
+      fprintf(stderr, "=> \t");
+      dump(stderr, mem, old);
+
+      while (i < size)
+        {
+          new[addr + i] = mem[old + i];
+          i = i + 1;
+        }
+
+      mem[old + SLOT_FORWARD] = addr;
+
+      fprintf(stderr, "<= \t");
+      dump(stderr, mem, old);
+
+      (*strt) = (*strt) + size;
+
+      return (addr);
+    }
+}
+
+static int
+flipmem(t_dono *dono)
+{
+  t_case  *new;
+  t_case  scan;
+  t_case  temp;
+  t_case  strt;
+  int     i;
+
+  new = malloc((dono->size + ADD_MEMORY) * sizeof(t_case));
+  scan = 0;
+  strt = 0;
+
+#ifdef DEBUG
+  fprintf(stderr, "----- OLD DUMP -----\n");
+  dumpmem(stderr, mem, ns, mp);
+  fprintf(stderr, "mp: %02x, ns: %02x, os: %02x, ts: %02x\n", mp, ns, os, ts);
+  fprintf(stderr, "rs: %02x, ep: %02x, op: %02x\n", rs, ep, op);
+#endif
+
+  if (new == NULL)
+    return (FAIL);
+
+  rs = copymem(dono, rs, new, &strt);
+  ep = copymem(dono, ep, new, &strt);
+  op = copymem(dono, op, new, &strt);
+
+  if (ap != -1)
+    ap = copymem(dono, ap, new, &strt);
+  if (bp != -1)
+    bp = copymem(dono, bp, new, &strt);
+
+  while (scan < strt)
+    {
+      temp = new[scan + SLOT_SIZE];
+      i = new[scan + SLOT_LCHILD];
+
+      fprintf(stderr, "REF\t");
+      dump(stderr, new, scan);
+
+      while (i > new[scan + SLOT_FCHILD])
+        {
+          new[scan + i] = copymem(dono, new[scan + i], new, &strt);
+          i = i - 1;
+        }
+
+      scan = scan + temp;
+    }
+
+#ifdef DEBUG
+  fprintf(stderr, "----- NEW DUMP -----\n");
+  dumpmem(stderr, new, 0, strt);
+#endif
+
+  dono->size = dono->size + ADD_MEMORY;
+  mp = strt;
+  ns = 0;
+  os = dono->size / 2;
+  ts = (dono->size / 2) - 1;
+  mem = new;
+
+#ifdef DEBUG
+  fprintf(stderr, "mp: %02x, ns: %02x, os: %02x, ts: %02x\n", mp, ns, os, ts);
+  fprintf(stderr, "rs: %02x, ep: %02x, op: %02x\n", rs, ep, op);
+#endif
+
+  return (OK);
+}
+
 static int
 allocate(t_dono *dono, const t_case size, t_case *node)
 {
@@ -754,7 +876,8 @@ allocate(t_dono *dono, const t_case size, t_case *node)
   if (size + mp > ts)
     flip(dono);
 
-  if (size + mp > ts)
+  if (size + mp > ts
+      && flipmem(dono) == FAIL)
     {
       fprintf(stderr, "Memory fail\n");
       return (FAIL);
@@ -822,20 +945,21 @@ environment_set(const t_dono *dono, const t_case e, const t_case v, const t_case
 }
 
 static int
-environment_extend(t_dono *dono, const t_case e, const unsigned int s, t_case *node)
+environment_extend(t_dono *dono, const t_case *e, const unsigned int s, t_case *node)
 {
   t_case  old;
   t_case  ptr;
   t_case  i;
 
-  ptr = e;
-  old = mem[ptr + SLOT_SIZE] - SIZE_CONTAINER;
+  old = mem[(*e) + SLOT_SIZE] - SIZE_CONTAINER;
 
   if (container(dono, old + s, node) != OK)
     return (FAIL);
 
-  if (mem[ptr + SLOT_FORWARD] != -1)
-    ptr = mem[ptr + SLOT_FORWARD];
+  if (mem[(*e) + SLOT_FORWARD] != -1)
+    ptr = mem[(*e) + SLOT_FORWARD];
+  else
+    ptr = (*e);
 
   i = mem[ptr + SLOT_FCHILD];
 
@@ -906,6 +1030,7 @@ run(FILE *fd)
 
   ts = (dono->size / 2) - 1;
   ap = (-1);
+  bp = (-1);
   ns = 0;
   mp = 0;
   pc = 0;
