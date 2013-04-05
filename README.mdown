@@ -13,7 +13,7 @@ Dépendance:
   OCamllex
   OCamlbuild
   Menhir
-  Clang
+  GCC
   GNU Flex
 
 cd dinc && make
@@ -75,6 +75,17 @@ compilé à l'aide de Dinc. Il exécute ensuite le code du fichier donné en
 paramètre. Vous pouvez voir le « debug » de ces interpréteurs en ajoutant
 `#define DEBUG` dans le fichier `dinoscheme.h`. Vous aurez sur stderr tout une
 sortie sur les instructions que fait la machine virtuelle.
+
+Si vous êtes face à un bug sur la machine virtuelle, il peut être intéressant
+d'activer DEBUG et de m'envoyer le fichier source et la sortie d'erreur. La
+correction du bug va parcontre être très long vue la masse d'information à
+manipuler. Si, là aussi, vous avez des idées pour un DEBUG plus rapide, je suis
+prenneur, c'est pas cool de ce taper le dump de la mémoire et de vérifier toutes
+les références.
+
+PS: Vous pouvez faire buguer le dinoscheme en remplaçant ADD_MEMORY et
+SIZE_MEMORY par 512 et en essayant d'exécuter examples/program.dino. Good luck
+pour trouver le bug !
 
 ## Avenir
 
