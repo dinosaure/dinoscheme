@@ -83,10 +83,6 @@ manipuler. Si, là aussi, vous avez des idées pour un DEBUG plus rapide, je sui
 prenneur, c'est pas cool de ce taper le dump de la mémoire et de vérifier toutes
 les références.
 
-PS: Vous pouvez faire buguer le dinoscheme en remplaçant ADD_MEMORY et
-SIZE_MEMORY par 512 et en essayant d'exécuter examples/program.dino. Good luck
-pour trouver le bug !
-
 ## Avenir
 
 Aujourd'hui, le DinoScheme est un projet maintenu par un étudiant Epitech qui se
