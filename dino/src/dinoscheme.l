@@ -3,7 +3,6 @@
 #include "dinoscheme.h"
 
 #define ABS(a)  ((a < 0) ? -a : a)
-#define DEBUG
 
 #define PC    (0)
 #define MP    (1)
