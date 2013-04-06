@@ -83,6 +83,10 @@ manipuler. Si, là aussi, vous avez des idées pour un DEBUG plus rapide, je sui
 prenneur, c'est pas cool de ce taper le dump de la mémoire et de vérifier toutes
 les références.
 
+/!\ Dini est désormais obsolète puisqu'il y a eu une grande phase de debug dans
+Dino qui n'ont pas été reporté sur Dini. En somme, si j'ai le temps, j'y
+passerais du temps mais je vous conseille d'utiliser Dino de préférence. /!\
+
 ## Avenir
 
 Aujourd'hui, le DinoScheme est un projet maintenu par un étudiant Epitech qui se
