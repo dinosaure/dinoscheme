@@ -29,9 +29,9 @@
 #define SIZE_CONTAINER  (4)
 #define SIZE_VALUE      (5)
 #define SIZE_STACK      (32)
-#define SIZE_MEMORY     (1024)
+#define SIZE_MEMORY     (512)
 
-#define ADD_MEMORY      (1024)
+#define ADD_MEMORY      (512)
 
 #define SLOT_SIZE       (0)
 #define SLOT_FORWARD    (1)
@@ -473,18 +473,17 @@ EPT   \x17
     return (FAIL);
 
   push(dono, ap, op);
-  clos = ap;
-  ap = (-1);
 
   if (environment_extend(dono, &ep, 1, &envr) != OK)
     return (FAIL);
 
-  environment_set(dono, envr, 0, clos);
+  environment_set(dono, envr, 0, ap);
 
-  mem[clos + SLOT_LCHILD] += 1;
-  mem[clos + mem[clos + SLOT_FCHILD] + 1] = envr;
-  mem[clos + mem[clos + SLOT_FCHILD] + 2] = size;
-  mem[clos + mem[clos + SLOT_FCHILD] + 3] = pc + 5;
+  mem[ap + SLOT_LCHILD] += 1;
+  mem[ap + mem[ap + SLOT_FCHILD] + 1] = envr;
+  mem[ap + mem[ap + SLOT_FCHILD] + 2] = size;
+  mem[ap + mem[ap + SLOT_FCHILD] + 3] = pc + 5;
+  ap = (-1);
 
 #ifdef DEBUG
   fprintf(stderr, "FUR\t");
