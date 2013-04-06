@@ -3,7 +3,7 @@ CCLEX=		flex
 IDIR=			include
 LDIRS=			
 LFLAGS=		$(LDIRS)
-CFLAGS=		-O0 -I $(IDIR) -g
+CFLAGS=		-O2 -I $(IDIR) -g
 RM=				rm -f
 
 NAME=			dino
