@@ -3,6 +3,7 @@
 #include "dinoscheme.h"
 
 #define ABS(a)  ((a < 0) ? -a : a)
+#define DEBUG
 
 #define PC    (0)
 #define MP    (1)
@@ -29,9 +30,9 @@
 #define SIZE_CONTAINER  (4)
 #define SIZE_VALUE      (5)
 #define SIZE_STACK      (32)
-#define SIZE_MEMORY     (512)
+#define SIZE_MEMORY     (128) /* > 64 for stack frame and whatever */
 
-#define ADD_MEMORY      (512)
+#define ADD_MEMORY      (128)
 
 #define SLOT_SIZE       (0)
 #define SLOT_FORWARD    (1)
