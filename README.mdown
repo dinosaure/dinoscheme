@@ -1,9 +1,9 @@
 # Le DinoScheme
 
 Le DinoScheme est un langage informatique compilé (avec le logiciel dinc -
-OCaml) et un interprété à l'aide d'une machine virtuelle (avec le logiciel dini
-- C). Le langage dérive de la syntaxe de Scheme mais qui dispose en plus une
-implémentation du système F dans le compilateur. C'est donc un langage
+OCaml) et un interprété à l'aide d'une machine virtuelle (avec le logiciel
+dini - C). Le langage dérive de la syntaxe de Scheme mais qui dispose en plus
+une implémentation du système F dans le compilateur. C'est donc un langage
 fonctionnel qui reste (et restera) basique.
 
 ## Compilation
