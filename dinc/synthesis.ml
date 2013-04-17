@@ -27,7 +27,7 @@ let rec eval env a = match a with
   | Lambda.Null              -> Type.tvoid
   | Lambda.Nill              -> Type.tlist (Type.unknowntype ())
 
-  | Lambda.Word n             -> search env n
+  | Lambda.Word n            -> search env n
 
   | Lambda.Lambda (arg, exp, sta) ->
       let env = lambda env arg sta
