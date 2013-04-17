@@ -29,7 +29,7 @@
 #define SIZE_CONTAINER  (4)
 #define SIZE_VALUE      (5)
 #define SIZE_STACK      (32)
-#define SIZE_MEMORY     (128) /* > 64 for stack frame and whatever */
+#define SIZE_MEMORY     (128)
 
 #define ADD_MEMORY      (128)
 
