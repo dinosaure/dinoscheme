@@ -46,6 +46,7 @@ rule lexer = parse
   | "nill"                            { NILL }
   | "begin"                           { BEGIN }
   | "."                               { DOT }
+  | ","                               { COMMA }
   | '-' ? DIGIT + as i                { Integer (int_of_string i) }
   | '-' ? DIGIT + '.' DIGIT + as f    { Real (float_of_string f) }
   | ALL+ as w                         { Word w }

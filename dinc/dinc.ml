@@ -30,6 +30,8 @@ let el = Lambda.El.add "<" el
 let el = Lambda.El.add ">" el
 let el = Lambda.El.add "<=" el
 let el = Lambda.El.add ">=" el
+let el = Lambda.El.add "fst" el
+let el = Lambda.El.add "snd" el
 
 let ep = In.add "+"      1   (In.default In.eval 1) ep
 let ep = In.add "-"      2   (In.default In.eval 2) ep
@@ -45,6 +47,8 @@ let ep = In.add "empty"  23  In.pempty     ep
 let ep = In.add "#chr"   9   In.pprint_chr ep
 let ep = In.add "#num"   9   In.pprint_num ep
 let ep = In.add "#bln"   9   In.pprint_bln ep
+let ep = In.add "fst"    22  In.pfst       ep
+let ep = In.add "snd"    22  In.psnd       ep
 
 let ep = In.add "<"      24  (In.default In.eval 24) ep
 let ep = In.add ">"      25  (In.default In.eval 25) ep
@@ -86,9 +90,17 @@ let et = let a = Type.unknowntype ()
          in let t = Type.primitive (Type.tarrow (Type.tlist a) a)
          in Synthesis.Et.add "hd" t et
 
+let et = let a = Type.unknowntype () in let b = Type.unknowntype ()
+         in let t = Type.primitive (Type.tarrow (Type.ttuple [|a; b|]) a)
+         in Synthesis.Et.add "fst" t et
+
 let et = let a = Type.unknowntype ()
          in let t = Type.primitive (Type.tarrow (Type.tlist a) (Type.tlist a))
          in Synthesis.Et.add "tl" t et
+
+let et = let a = Type.unknowntype () in let b = Type.unknowntype ()
+         in let t = Type.primitive (Type.tarrow (Type.ttuple [|a; b|]) b)
+         in Synthesis.Et.add "snd" t et
 
 let et = let a = Type.unknowntype ()
          in let b = Type.unknowntype ()

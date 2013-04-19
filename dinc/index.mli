@@ -9,6 +9,7 @@ type t =
   | Condition of t * t * t
   | Nill
   | Null
+  | Tuple of t list
   | Variable of string * int
   | Application of t * t
   | Primitive of string * t list

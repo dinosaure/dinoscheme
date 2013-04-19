@@ -6,6 +6,7 @@ val treal: simpletype
 val tcharacter: simpletype
 val tarrow: simpletype -> simpletype -> simpletype
 val tlist: simpletype -> simpletype
+val ttuple: simpletype array -> simpletype
 val tvoid: simpletype
 
 val unknowntype: unit -> simpletype

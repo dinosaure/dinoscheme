@@ -24,6 +24,7 @@ let rec eval = function
   | Index.Lambda _ -> 1
   | Index.Condition (i, a, b) -> max [eval i; eval a; eval b]
   | Index.List (a, b) -> max [eval a; 1 + eval b]
+  | Index.Tuple l -> (List.length l) + (List.fold_left (+) 0 (List.map (fun x -> eval x) l))
   | Index.Primitive (p, l) -> max (zip (+) (range (List.length l)) (List.map (fun x -> eval x) l))
   | Index.Application (a, b) -> max [eval a; 1 + eval b]
   | Index.Sequence (a, b) -> let a = eval a in max [a; a + eval b]

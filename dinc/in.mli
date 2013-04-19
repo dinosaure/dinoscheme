@@ -24,3 +24,5 @@ val pempty:     f
 val pprint_chr: f
 val pprint_num: f
 val pprint_bln: f
+val pfst:       f
+val psnd:       f

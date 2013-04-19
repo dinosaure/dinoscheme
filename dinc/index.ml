@@ -11,6 +11,7 @@ type t =
   | Condition of t * t * t
   | Nill
   | Null
+  | Tuple of t list
   | Variable of string * int
   | Application of t * t
   | Primitive of string * t list
@@ -36,5 +37,6 @@ let rec indexing index env expression =
     | Lambda.Boolean b -> Boolean b
     | Lambda.Null -> Null
     | Lambda.Nill -> Nill
+    | Lambda.Tuple l -> Tuple (List.map (fun x -> indexing index env x) l)
 
 let eval exp = indexing 0 Ei.empty exp

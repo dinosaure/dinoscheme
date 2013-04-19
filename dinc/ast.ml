@@ -11,4 +11,5 @@ type t =
   | Condition of t * t * t
   | Nill
   | Null
+  | Tuple of t list
   | Application of t * t

@@ -19,14 +19,15 @@
 %token DEFINE
 %token LAMBDA
 %token LIST
-%token NILL 
+%token NILL
 %token BEGIN
 %token DOT
-%token <string> Word 
-%token <string> String 
-%token <char> Character 
-%token <int> Integer 
-%token <float> Real 
+%token COMMA
+%token <string> Word
+%token <string> String
+%token <char> Character
+%token <int> Integer
+%token <float> Real
 %token <bool> Boolean
 
 %left Word
@@ -52,6 +53,9 @@ expression:
   | RPA DOT x = expression r = expression LPA
   { Ast.List (x, r) }
 
+  | RPA t = tuple LPA
+  { Ast.Tuple t }
+
   | l = delimited(RPA, expression+, LPA) 
   { Ast.Instr l }
 
@@ -60,6 +64,12 @@ expression:
 
   | x = leave
   { x }
+
+tuple:
+  | a = expression COMMA b = expression
+  { [a; b] }
+  | h = expression COMMA t = tuple
+  { h :: t }
 
 leave: w = Word   { Ast.Word w }
   | s = String    { foldr (fun x -> fun y -> Ast.List (Ast.Character x, y)) Ast.Nill (explode s) }

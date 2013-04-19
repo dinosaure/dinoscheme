@@ -12,6 +12,7 @@ type t =
   | Condition of t * t * t
   | Nill
   | Null
+  | Tuple of t list
   | Application of t * t
   | Primitive of string * t list
 
@@ -60,3 +61,4 @@ let rec eval ep = function
   | Ast.Nill -> Nill
   | Ast.Instr []
   | Ast.Null -> Null
+  | Ast.Tuple t -> Tuple (List.map (fun x -> eval ep x) t)

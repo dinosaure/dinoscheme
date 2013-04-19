@@ -18,6 +18,7 @@ let treal         = Word ("real",       [||])
 let tcharacter    = Word ("character",  [||])
 let tarrow a b    = Word ("->",         [|a; b|])
 let tlist t       = Word ("list",       [|t|])
+let ttuple e      = Word ("*",          e)
 let tvoid         = Word ("void",       [||])
 
 let l = ref 0

@@ -77,6 +77,9 @@ let rec eval env o = function
 
   | Index.Null                -> 21 :: ((word_of_integer 0) @ o)
 
+  | Index.Tuple l             -> let e = List.concat (List.map (fun x -> eval env [] x) l)
+                                in e @ (21 :: ((word_of_integer (List.length l)) @ o))
+
   | Index.Sequence (a, b)     -> eval env (eval env o b) a
 
 let string_of_opcode o =
@@ -92,7 +95,7 @@ let phd env o = function
 
 let ptl env o = function
   | [ expr ] -> eval env (22 :: ((word_of_integer 1) @ o)) expr
-  | _ -> raise (Failure ("opcode: rror in use tl primitive"))
+  | _ -> raise (Failure ("opcode: error in use tl primitive"))
 
 let pempty env o = function
   | [ expr ] -> eval env (23 :: o) expr
@@ -101,6 +104,14 @@ let pempty env o = function
 let pprint t env o = function
   | [ expr ] -> eval env (9 :: ((word_of_integer t) @ o)) expr
   | _ -> raise (Failure ("opcode: error in use print primitive"))
+
+let pfst env o = function
+  | [ expr ] -> eval env (22 :: ((word_of_integer 0) @ o)) expr
+  | _ -> raise (Failure ("opcode: error in use fst primitive"))
+
+let psnd env o = function
+  | [ expr ] -> eval env (22 :: ((word_of_integer 1) @ o)) expr
+  | _ -> raise (Failure ("opcode: error in use snd primitive"))
 
 let pprint_chr = pprint 1
 let pprint_num = pprint 2

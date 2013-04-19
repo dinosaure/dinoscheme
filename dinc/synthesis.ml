@@ -45,6 +45,9 @@ let rec eval env a = match a with
       Type.unification (Type.tlist ph) pt;
       pt
 
+  | Lambda.Tuple l ->
+      Type.ttuple (Array.of_list (List.map (fun x -> eval env x) l))
+
   | Lambda.Sequence (pa, pb) ->
       let ta = eval env pa and tb = eval env pb
       in Type.unification ta Type.tvoid; tb
