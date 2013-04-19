@@ -26,6 +26,10 @@ let el = Lambda.El.add "empty" el
 let el = Lambda.El.add "#chr" el
 let el = Lambda.El.add "#num" el
 let el = Lambda.El.add "#bln" el
+let el = Lambda.El.add "<" el
+let el = Lambda.El.add ">" el
+let el = Lambda.El.add "<=" el
+let el = Lambda.El.add ">=" el
 
 let ep = In.add "+"      1   (In.default In.eval 1) ep
 let ep = In.add "-"      2   (In.default In.eval 2) ep
@@ -41,6 +45,11 @@ let ep = In.add "empty"  23  In.pempty     ep
 let ep = In.add "#chr"   9   In.pprint_chr ep
 let ep = In.add "#num"   9   In.pprint_num ep
 let ep = In.add "#bln"   9   In.pprint_bln ep
+
+let ep = In.add "<"      24  (In.default In.eval 24) ep
+let ep = In.add ">"      25  (In.default In.eval 25) ep
+let ep = In.add "<="     26  (In.default In.eval 26) ep
+let ep = In.add ">="     27  (In.default In.eval 27) ep
 
 let et = let t = Type.primitive (Type.tarrow Type.tinteger (Type.tarrow Type.tinteger Type.tinteger))
          in let et0 = Synthesis.Et.empty

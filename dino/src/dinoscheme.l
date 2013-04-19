@@ -610,6 +610,86 @@ EPT   \x17
   return (OK);
 }
 
+\x18 {
+  t_case  a;
+  t_case  b;
+  t_case  r;
+
+  a = mem[pop(dono, op) + SLOT_VALUE];
+  b = mem[pop(dono, op) + SLOT_VALUE];
+
+  if (value(dono, (b < a) ? 1 : 0, &r) != OK)
+    return (FAIL);
+
+  push(dono, r, op);
+
+#ifdef DEBUG
+  fprintf(stderr, "DF:\t%d < %d\n", b, a);
+#endif
+
+  return (OK);
+}
+
+\x19 {
+  t_case  a;
+  t_case  b;
+  t_case  r;
+
+  a = mem[pop(dono, op) + SLOT_VALUE];
+  b = mem[pop(dono, op) + SLOT_VALUE];
+
+  if (value(dono, (b > a) ? 1 : 0, &r) != OK)
+    return (FAIL);
+
+  push(dono, r, op);
+
+#ifdef DEBUG
+  fprintf(stderr, "DF:\t%d < %d\n", b, a);
+#endif
+
+  return (OK);
+}
+
+\x1A {
+  t_case  a;
+  t_case  b;
+  t_case  r;
+
+  a = mem[pop(dono, op) + SLOT_VALUE];
+  b = mem[pop(dono, op) + SLOT_VALUE];
+
+  if (value(dono, (b <= a) ? 1 : 0, &r) != OK)
+    return (FAIL);
+
+  push(dono, r, op);
+
+#ifdef DEBUG
+  fprintf(stderr, "DF:\t%d <= %d\n", b, a);
+#endif
+
+  return (OK);
+}
+
+\x1B {
+  t_case  a;
+  t_case  b;
+  t_case  r;
+
+  a = mem[pop(dono, op) + SLOT_VALUE];
+  b = mem[pop(dono, op) + SLOT_VALUE];
+
+  if (value(dono, (b >= a) ? 1 : 0, &r) != OK)
+    return (FAIL);
+
+  push(dono, r, op);
+
+#ifdef DEBUG
+  fprintf(stderr, "DF:\t%d >= %d\n", b, a);
+#endif
+
+  return (OK);
+}
+
 %%
 
 void
