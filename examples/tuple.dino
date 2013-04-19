@@ -1,0 +1,18 @@
+(define iter
+ (lambda (f l) (if (empty l) () (begin (f (hd l)) (iter f (tl l))))))
+
+(define #str
+ (lambda (l) (iter (lambda (x) (#chr x)) l)))
+
+(define in
+ (lambda (k l)
+  (if (empty l) false (if [k == (fst (hd l))] true (in k (tl l))))))
+
+(define get
+ (lambda (k l d)
+  (if (empty l) d (if [k == (fst (hd l))] (snd (hd l)) (get k (tl l) d)))))
+
+(define l (list (1, "dinosaure") (2, "dinoscheme") (3, "ocaml")))
+
+(if (in 3 l) (#str (get 3 l "error")) (#str "error"))
+(#chr '\n')
