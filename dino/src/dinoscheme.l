@@ -109,7 +109,7 @@ EPT   \x17
   push(dono, r, op);
 
 #ifdef DEBUG
-  fprintf(stderr, "WD\t%d", w);
+  fprintf(stderr, "WD\t%d ", w);
   dump(stderr, mem, op);
 #endif
 
@@ -934,6 +934,8 @@ flipmem(t_dono *dono)
   fprintf(stderr, "----- NEW DUMP -----\n");
   dumpmem(stderr, new, 0, strt);
 #endif
+
+  free(mem);
 
   dono->size = dono->size + ADD_MEMORY;
   mp = strt;
