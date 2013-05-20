@@ -3,6 +3,7 @@
 #include "dinoscheme.h"
 
 #define ABS(a)  ((a < 0) ? -a : a)
+#define DEBUG
 
 #define PC    (0)
 #define MP    (1)
@@ -685,6 +686,48 @@ EPT   \x17
 
 #ifdef DEBUG
   fprintf(stderr, "DF:\t%d >= %d\n", b, a);
+#endif
+
+  return (OK);
+}
+
+\x1C {
+  t_case    r;
+  t_case    a;
+  t_case    b;
+
+  a = mem[pop(dono, op) + SLOT_VALUE];
+  b = mem[pop(dono, op) + SLOT_VALUE];
+
+  if (value(dono, (b && a) ? 1 : 0, &r) != OK)
+    return (FAIL);
+
+  push(dono, r, op);
+
+#ifdef DEBUG
+  fprintf(stderr, "AND\t%d && %d", b, a);
+  dump(stderr, mem, r);
+#endif
+
+  return (OK);
+}
+
+\x1D {
+  t_case    r;
+  t_case    a;
+  t_case    b;
+
+  a = mem[pop(dono, op) + SLOT_VALUE];
+  b = mem[pop(dono, op) + SLOT_VALUE];
+
+  if (value(dono, (b || a) ? 1 : 0, &r) != OK)
+    return (FAIL);
+
+  push(dono, r, op);
+
+#ifdef DEBUG
+  fprintf(stderr, "OR\t%d || %d", b, a);
+  dump(stderr, mem, r);
 #endif
 
   return (OK);

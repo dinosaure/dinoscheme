@@ -32,6 +32,8 @@ let el = Lambda.El.add "<=" el
 let el = Lambda.El.add ">=" el
 let el = Lambda.El.add "fst" el
 let el = Lambda.El.add "snd" el
+let el = Lambda.El.add "and" el
+let el = Lambda.El.add "or" el
 
 let ep = In.add "+"      1   (In.default In.eval 1) ep
 let ep = In.add "-"      2   (In.default In.eval 2) ep
@@ -54,6 +56,9 @@ let ep = In.add "<"      24  (In.default In.eval 24) ep
 let ep = In.add ">"      25  (In.default In.eval 25) ep
 let ep = In.add "<="     26  (In.default In.eval 26) ep
 let ep = In.add ">="     27  (In.default In.eval 27) ep
+
+let ep = In.add "and"    28  (In.default In.eval 28) ep
+let ep = In.add "or"     29  (In.default In.eval 29) ep
 
 let et = let t = Type.primitive (Type.tarrow Type.tinteger (Type.tarrow Type.tinteger Type.tinteger))
          in let et0 = Synthesis.Et.empty
@@ -113,6 +118,9 @@ let et = let t = Type.primitive (Type.tarrow Type.tinteger Type.tvoid)
          in Synthesis.Et.add "#num" t et
 let et = let t = Type.primitive (Type.tarrow Type.tboolean Type.tvoid)
          in Synthesis.Et.add "#bln" t et
+
+let et = let t = Type.primitive (Type.tarrow Type.tboolean (Type.tarrow Type.tboolean Type.tboolean))
+         in Synthesis.Et.add "and" t (Synthesis.Et.add "or" t et)
 
 let compilator input output =
   let a = Lambda.eval el (Parser.main Lexer.lexer (Lexing.from_channel input)) in
