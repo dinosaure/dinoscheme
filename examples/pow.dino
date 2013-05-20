@@ -1,5 +1,5 @@
 (define -- (lambda (x) [x - 1]))
-(define pow (lambda (a n) (if [n == 0] 1 (if [n == 1] a [(pow a (-- n)) * a]))))
+(define ^ (lambda (a n) (if [n == 0] 1 (if [n == 1] a [(^ a (-- n)) * a]))))
 
-(#num (pow 5 2))
+(#num [5 ^ 2])
 (#chr '\n')
