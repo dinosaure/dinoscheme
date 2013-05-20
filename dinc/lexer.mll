@@ -53,7 +53,7 @@ rule lexer = parse
   | '"'                               { let buffer = Buffer.create 16 in String (stringl buffer lexbuf) }
   | "'" '\\' (BACKSLASH as c) "'"     { Character (char_of_backslash c) }
   | "'" '\\' HEXA as a HEXA as b "'"  { Character (char_of_hexa (String.get a 0) (String.get b 0)) }
-  | "'" [^ '\\'] as c "'"             { Character (String.get c 0) } 
+  | "'" ([^ '\\'] as c) "'"           { Character c } 
   | _                                 { lexer lexbuf }
 and stringl buffer = parse
   | '"'                               { Buffer.contents buffer }
