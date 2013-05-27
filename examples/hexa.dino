@@ -1,0 +1,4 @@
+(define a #a82f3e)
+
+(#num a)
+(#chr '\n')

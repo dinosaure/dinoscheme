@@ -19,6 +19,19 @@
              else if bc >= 65 then bc - 55
              else bc - 48
     in Char.chr (av * 16 + bv)
+
+  let int_of_hexa s =
+    let char_of_hexa a =
+      let cc = Char.code a in
+      if cc >= 97 then cc - 87
+      else if cc >= 65 then cc - 55
+      else cc - 48
+    in let rec aux a s = function
+      | 0 -> a + (char_of_hexa (String.get s ((String.length s) - 1)))
+      | n ->
+        aux ((a + (char_of_hexa (String.get s ((String.length s) - n)))) * 16)
+        s (n - 1)
+    in (aux 0 s (String.length s)) / 16
 }
 
 let DIGIT = ['0' - '9']
@@ -48,6 +61,7 @@ rule lexer = parse
   | "."                               { DOT }
   | ","                               { COMMA }
   | '-' ? DIGIT + as i                { Integer (int_of_string i) }
+  | '#' (HEXA + as i)                 { Integer (int_of_hexa i) }
   | '-' ? DIGIT + '.' DIGIT + as f    { Real (float_of_string f) }
   | ALL+ as w                         { Word w }
   | '"'                               { let buffer = Buffer.create 16 in String (stringl buffer lexbuf) }
