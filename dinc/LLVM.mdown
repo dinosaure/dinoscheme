@@ -1,9 +1,0 @@
-Ce document est là pour relater les différentes expériences avec l'API LLVM
-d'OCaml pour amorçer le projet TyLLVM. En effet, l'utilisation de cette
-librairie nous amène à des « segmentation fault » en OCaml puisqu'elle n'est
-qu'une copie de l'API LLVM en C++. Le travail consiste donc ici à cibler les
-erreurs possibles avec l'API LLVM d'OCaml au travers d'un projet réel.
-
-/!\ Cette branche est une branche de test, les commits ne sont peut être pas
-fonctionnels ! Ne pas prendre cette branche comme référence sauf si vous voulez
-joindre vos efforts au projet TyLLVM /!\
