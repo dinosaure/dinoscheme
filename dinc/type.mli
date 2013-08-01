@@ -1,30 +1,35 @@
-type simpletype and schematype
+type kind and schema
+type short_kind and short_schema
 
-val tinteger: simpletype
-val tboolean: simpletype
-val treal: simpletype
-val tcharacter: simpletype
-val tarrow: simpletype -> simpletype -> simpletype
-val tlist: simpletype -> simpletype
-val ttuple: simpletype array -> simpletype
-val tvoid: simpletype
+val type_integer: kind
+val type_boolean: kind
+val type_real: kind
+val type_character: kind
+val type_arrow: kind -> kind -> kind
+val type_list: kind -> kind
+val type_tuple: kind array -> kind
+val type_void: kind
 
-val unknowntype: unit -> simpletype
-val schema: simpletype -> schematype
-val primitive: simpletype -> schematype
+val short_kind: string -> short_schema array -> short_schema
+val short_variable: string -> short_schema
+val kind_from_short_kind: short_schema -> schema
+
+val unknown_type: unit -> kind
+val schema: kind -> schema
+val primitive: kind -> schema
 
 val start_definition: unit -> unit
 val stop_definition: unit -> unit
 
-val unification: simpletype -> simpletype -> unit
-val generalization: simpletype -> schematype
-val specialization: schematype -> simpletype
+val unification: kind -> kind -> unit
+val generalization: kind -> schema
+val specialization: schema -> kind
 
-val string_of_type: simpletype -> string 
-val circularity: (simpletype * simpletype) -> string
-val conflict: (simpletype * simpletype) -> string
+val string_of_type: kind -> string 
+val circularity: (kind * kind) -> string
+val conflict: (kind * kind) -> string
 
-val print_type: simpletype -> unit
+val print_type: kind -> unit
 
-exception Circularity of (simpletype * simpletype)
-exception Conflict of (simpletype * simpletype)
+exception Circularity of (kind * kind)
+exception Conflict of (kind * kind)

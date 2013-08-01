@@ -1,10 +1,8 @@
 module Ep = Map.Make (String)
 
 type t =
-  | Function of (int * f)
+  | Function of (t Ep.t -> int list -> Index.t list -> int list)
   | Constant of int
-and f = t Ep.t -> int list -> Index.t list -> int list
-and d = t Ep.t -> int list -> Index.t -> int list
 
 let rec pow a = function
   | 0 -> 1
@@ -20,11 +18,10 @@ let rec make n v = match n with
 let abs n = if n < 0 then -n else n
 
 let (>>=) (e, l, a) = function
-  | Function (o, f) -> f e l a
+  | Function f -> f e l a
   | Constant o -> raise (Failure ("primitive: this primive is not applicable"))
 
-let add name code primitive = Ep.add name (Function (code, primitive))
-let default eval code = (fun e l a -> foldr (fun x o -> eval e o x) (code :: l) a)
+let add name primitive = Ep.add name (Function primitive)
 
 let word_of_integer n = let rec aux n l = match n with
     | 0 -> l
@@ -49,36 +46,39 @@ let rec eval env o = function
   | Index.Integer i           -> 0 :: ((word_of_integer i) @ o)
   | Index.Real r              -> 0 :: ((word_of_real r) @ o)
   | Index.Character c         -> 0 :: ((word_of_character c) @ o)
+  | Index.Nill                -> 21 :: ((word_of_integer 0) @ o)
+  | Index.Null                -> 21 :: ((word_of_integer 0) @ o)
 
   | Index.Variable (n, i)     -> 12 :: ((word_of_integer i) @ o)
 
-  | Index.Lambda (n, c, r)    -> let cs = eval env [14] c
-                               in let cr = begin match r with
-                                 | Some n -> true
-                                 | None -> false end
-                               in ((if cr == true then 18 else 10) :: 
-                                  (word_of_integer (Operation.eval c))) @ 
-                                  (11 :: (word_of_integer (List.length cs))) @ 
-                                  cs @ o
+  | Index.Lambda (n, c, r)    ->
+    let cs = eval env [14] c
+    in let cr = begin match r with
+      | Some n -> true
+      | None -> false end
+    in ((if cr == true then 18 else 10) :: 
+      (word_of_integer (Operation.eval c))) @ 
+      (11 :: (word_of_integer (List.length cs))) @ 
+      cs @ o
 
-  | Index.Condition (i, a, b) -> let bo = eval env [] b
-                               in let ao = eval env (11 :: (word_of_integer (List.length bo))) a
-                               in let io = eval env (15 :: (word_of_integer (List.length ao))) i
-                               in io @ ao @ bo @ o
+  | Index.Condition (i, a, b) ->
+    let bo = eval env [] b
+    in let ao = eval env (11 :: (word_of_integer (List.length bo))) a
+    in let io = eval env (15 :: (word_of_integer (List.length ao))) i
+    in io @ ao @ bo @ o
 
   | Index.Application (a, b)  -> (eval env (eval env [13] b) a) @ o
 
-  | Index.Primitive (s, l)    -> begin try (env, o, l) >>= (Ep.find s env)
-                               with _ -> raise (Failure ("opcode: unbound primitive " ^ s)) end
+  | Index.Primitive (s, l)    ->
+    begin try (env, o, l) >>= (Ep.find s env)
+    with _ -> raise (Failure ("opcode: unbound primitive " ^ s)) end
 
-  | Index.List (x, r)         -> eval env (eval env (21 :: ((word_of_integer 2) @ o)) r) x
+  | Index.List (x, r)         ->
+    eval env (eval env (21 :: ((word_of_integer 2) @ o)) r) x
 
-  | Index.Nill                -> 21 :: ((word_of_integer 0) @ o)
-
-  | Index.Null                -> 21 :: ((word_of_integer 0) @ o)
-
-  | Index.Tuple l             -> let e = List.concat (List.map (fun x -> eval env [] x) l)
-                                in e @ (21 :: ((word_of_integer (List.length l)) @ o))
+  | Index.Tuple l             ->
+    let e = List.concat (List.map (fun x -> eval env [] x) l)
+    in e @ (21 :: ((word_of_integer (List.length l)) @ o))
 
   | Index.Sequence (a, b)     -> eval env (eval env o b) a
 
@@ -88,31 +88,3 @@ let string_of_opcode o =
     | x :: r -> Buffer.add_char buffer x;
                 f buffer r
   in f (Buffer.create 16) o
-
-let phd env o = function
-  | [ expr ] -> eval env (22 :: ((word_of_integer 0) @ o)) expr
-  | _ -> raise (Failure ("opcode: error in use hd primitive"))
-
-let ptl env o = function
-  | [ expr ] -> eval env (22 :: ((word_of_integer 1) @ o)) expr
-  | _ -> raise (Failure ("opcode: error in use tl primitive"))
-
-let pempty env o = function
-  | [ expr ] -> eval env (23 :: o) expr
-  | _ -> raise (Failure ("opcode: error in use empty primitive"))
-
-let pprint t env o = function
-  | [ expr ] -> eval env (9 :: ((word_of_integer t) @ o)) expr
-  | _ -> raise (Failure ("opcode: error in use print primitive"))
-
-let pfst env o = function
-  | [ expr ] -> eval env (22 :: ((word_of_integer 0) @ o)) expr
-  | _ -> raise (Failure ("opcode: error in use fst primitive"))
-
-let psnd env o = function
-  | [ expr ] -> eval env (22 :: ((word_of_integer 1) @ o)) expr
-  | _ -> raise (Failure ("opcode: error in use snd primitive"))
-
-let pprint_chr = pprint 1
-let pprint_num = pprint 2
-let pprint_bln = pprint 3

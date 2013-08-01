@@ -1,0 +1,37 @@
+(define + #01 (type [integer -> integer -> integer]))
+(define - #02 (type [integer -> integer -> integer]))
+(define * #03 (type [integer -> integer -> integer]))
+(define / #04 (type [integer -> integer -> integer]))
+
+(define == #10 (type [a -> a -> boolean]))
+(define <> #11 (type [a -> a -> boolean]))
+
+(define < #18 (type [integer -> integer -> boolean]))
+(define > #19 (type [integer -> integer -> boolean]))
+(define <= #1A (type [integer -> integer -> boolean]))
+(define >= #1B (type [integer -> integer -> boolean]))
+
+(define and #1C (type [boolean -> boolean -> boolean]))
+(define or #1D (type [boolean -> boolean -> boolean]))
+
+(define empty #17 (type [a list -> boolean]))
+(define hd #16 (type [a list -> a]))
+(define tl #16 (type [a list -> a list]))
+
+(define #chr #09 (type [character -> void]))
+(define #num #09 (type [integer -> void]))
+(define #bln #09 (type [boolean -> void]))
+
+(define fst #16 (type [(a, b) -> a]))
+(define snd #16 (type [(a, b) -> b]))
+
+(apply hd hd)
+(apply tl tl)
+(apply empty empty)
+
+(apply #chr print_chr)
+(apply #num print_num)
+(apply #bln print_bln)
+
+(apply fst fst)
+(apply snd snd)

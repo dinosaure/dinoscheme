@@ -22,7 +22,7 @@ and environment = (int * string) list
 let foldl f a l = List.fold_left f a l
 
 let ecount = ref 0
-let string_of_environment = Utils.string_of "e" ecount
+let string_of_environment = Util.string_of "e" ecount
 
 let rec free = function
   | Lambda.Character _

@@ -17,7 +17,7 @@ let g_closure g = L.struct_type g.ctxt
                   [| L.pointer_type (g_function g); (g_int g) |]
 
 let fcount = ref 0
-let string_of_function = Utils.string_of "f" fcount
+let string_of_function = Util.string_of "f" fcount
 
 let g_prototype g n_arg n_env =
   let argm = [| n_arg; n_env |] in
