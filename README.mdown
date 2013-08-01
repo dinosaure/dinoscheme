@@ -70,6 +70,15 @@ Exemple:
 ./dinc.native file.dino > file.dono
 ./dinc.native < file.dino > file.dono
 
+Une nouvelle utilisation vient de se mettre en place. En effet, on est capable
+de définir les primitives dans un fichier *.ding et de le donner en paramètre à
+la compilation pour ensuite générer le fichier *.dono qui va bien. Cette
+modification permet de se délaisser des compétences OCaml pour changer des
+détails dans la compilation. Le fichier *.ding intervient avec l'option -i.
+Si il n'y a pas de fichier *.ding, il n'y a aucune primitive qui n'est assigné
+dans le compilateur (comme `+` par exemple). Ce fichier est donc nécessaire
+à la compilation.
+
 Dini et Dino sont des interpréteurs qui prennent en paramètre un unique fichier
 compilé à l'aide de Dinc. Il exécute ensuite le code du fichier donné en
 paramètre. Vous pouvez voir le « debug » de ces interpréteurs en ajoutant
