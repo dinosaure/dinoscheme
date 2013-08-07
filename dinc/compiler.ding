@@ -4,6 +4,7 @@
 (define / #04 (type [integer -> integer -> integer]))
 
 (define == #10 (type [a -> a -> boolean]))
+(define = #1E (type [a -> a -> boolean]))
 (define <> #11 (type [a -> a -> boolean]))
 
 (define < #18 (type [integer -> integer -> boolean]))

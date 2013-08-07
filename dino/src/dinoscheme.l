@@ -49,51 +49,36 @@
 
   static t_dono *	dono = NULL;
 
-  static void     dump(FILE *fd, const t_case *ptr, const int position);
+  static void     dump(FILE *, const t_case *, const int);
+  static void     dumpmem(FILE *, const t_case *, const int, const int);
+
   static t_dono * get_dono();
-  static void     set_dono(t_dono *new);
-  static t_case   get(const char *instr);
-  static t_case   copy(t_dono *dono, const t_case old);
-  static void     flip(t_dono *dono);
-  static int      flipmem(t_dono *dono);
-  static int      allocate(t_dono *dono, const t_case size, t_case *node);
-  static int      container(t_dono *dono, const t_case size, t_case *node);
-  static int      value(t_dono *dono, const t_case value, t_case *node);
-  static t_case   environment_get(const t_dono *dono, const t_case e, const t_case v);
-  static void     environment_set(const t_dono *dono, const t_case e, const t_case v, const t_case d);
-  static int      environment_extend(t_dono *dono, const t_case *e, const unsigned int s, t_case *node);
-  static void     push(const t_dono *dono, const t_case value, const t_case stack);
-  static t_case   pop(const t_dono *dono, const t_case stack);
+  static void     set_dono(t_dono *);
+
+  static t_case   get(const char *);
+  static int      seq(t_dono *, const t_case, const t_case);
+
+  static t_case   copy(t_dono *, const t_case);
+  static t_case   copymem(t_dono *, const t_case, t_case *, t_case *);
+  static void     flip(t_dono *);
+  static int      flipmem(t_dono *);
+
+  static int      allocate(t_dono *, const t_case, t_case *);
+  static int      container(t_dono *, const t_case, t_case *);
+  static int      value(t_dono *, const t_case, t_case *);
+
+  static t_case   env_get(const t_dono *, const t_case, const t_case);
+  static void     env_set(const t_dono *, const t_case, const t_case, const t_case);
+  static int      env_ext(t_dono *, const t_case *, const unsigned int, t_case *);
+
+  static void     push(const t_dono *, const t_case, const t_case);
+  static t_case   pop(const t_dono *, const t_case);
 
 %}
 
 %option noyywrap
 
 CODE  [\x00-\xFF]
-WD    \x00
-ADD   \x01
-SUB   \x02
-MUL   \x03
-DIV   \x04
-MOD   \x05
-END   \x06
-GO    \x07
-DP    \x08
-DS    \x09
-FUN   \x0A
-JMP   \x0B
-LD    \x0C
-CAL   \x0D
-RTN   \x0E
-GT    \x0F
-EQ    \x10
-DF    \x11
-FUR   \x12
-TAIL  \x13
-NO    \x14
-CN    \x15
-ACC   \x16
-EPT   \x17
 
 %%
 
@@ -309,14 +294,14 @@ EPT   \x17
   t_case    data;
 
   word = get(yytext + 1);
-  data = environment_get(dono, ep, word);
+  data = env_get(dono, ep, word);
   push(dono, data, op);
 
 #ifdef DEBUG
   fprintf(stderr, "LD\t");
   dump(stderr, mem, ep);
   fprintf(stderr, "\t");
-  dump(stderr, mem, environment_get(dono, ep, word));
+  dump(stderr, mem, env_get(dono, ep, word));
 #endif
 
   return (OK);
@@ -335,11 +320,11 @@ EPT   \x17
 
   bp = mem[closure + mem[closure + SLOT_LCHILD] - 0];
 
-  if (environment_extend(dono, &bp, 1, &ap) != OK)
+  if (env_ext(dono, &bp, 1, &ap) != OK)
     return (FAIL);
 
   value = pop(dono, op);
-  environment_set(dono, ap, 0, value);
+  env_set(dono, ap, 0, value);
   closure = pop(dono, op);
 
   if (container(dono, 3, &frame) != OK)
@@ -474,10 +459,10 @@ EPT   \x17
 
   push(dono, ap, op);
 
-  if (environment_extend(dono, &ep, 1, &envr) != OK)
+  if (env_ext(dono, &ep, 1, &envr) != OK)
     return (FAIL);
 
-  environment_set(dono, envr, 0, ap);
+  env_set(dono, envr, 0, ap);
 
   mem[ap + SLOT_LCHILD] += 1;
   mem[ap + mem[ap + SLOT_FCHILD] + 1] = envr;
@@ -507,11 +492,11 @@ EPT   \x17
 
   bp = mem[closure + mem[closure + SLOT_LCHILD] - 0];
 
-  if (environment_extend(dono, &bp, 1, &ep) != OK)
+  if (env_ext(dono, &bp, 1, &ep) != OK)
     return (FAIL);
 
   value = pop(dono, op);
-  environment_set(dono, ep, 0, value);
+  env_set(dono, ep, 0, value);
   (void) pop(dono, op);
 
   fseek(yyin, addr, SEEK_SET);
@@ -732,6 +717,26 @@ EPT   \x17
   return (OK);
 }
 
+\x1E {
+  t_case  a;
+  t_case  b;
+  t_case  r;
+
+  a = pop(dono, op);
+  b = pop(dono, op);
+
+  if (value(dono, (seq(dono, a, b) == OK) ? 1 : 0, &r) != OK)
+    return (FAIL);
+
+  push(dono, r, op);
+
+#ifdef DEBUG
+  fprintf(stderr, "SEQ:\t%d == %d\n", a, b);
+#endif
+
+  return (OK);
+}
+
 %%
 
 void
@@ -805,6 +810,40 @@ get(const char *instr)
   }
 
   return (r * p);
+}
+
+static int
+seq(t_dono *dono, const t_case a, const t_case b)
+{
+  int     i;
+
+  if (mem[a + SLOT_SIZE] != mem[b + SLOT_SIZE]
+      || mem[a + SLOT_LCHILD] != mem[b + SLOT_LCHILD])
+    return (FAIL);
+  else
+    {
+      i = mem[a + SLOT_LCHILD];
+
+      while (i > mem[a + SLOT_FCHILD])
+        {
+          if (seq(dono, mem[a + i], mem[b + i]) == FAIL)
+            return (FAIL);
+
+          i = i - 1;
+        }
+
+      i = mem[a + SLOT_LCHILD] + 1;
+
+      while (i < mem[a + SLOT_SIZE] && i < mem[b + SLOT_SIZE])
+        {
+          if (mem[a + i] != mem[b + i])
+            return (FAIL);
+
+          i = i + 1;
+        }
+
+      return (OK);
+    }
 }
 
 static t_case
@@ -1053,7 +1092,7 @@ value(t_dono *dono, const t_case value, t_case *node)
 }
 
 static t_case
-environment_get(const t_dono *dono, const t_case e, const t_case v)
+env_get(const t_dono *dono, const t_case e, const t_case v)
 {
   if (v < 0 || v > mem[e + SLOT_LCHILD] - mem[e + SLOT_FCHILD])
     fprintf(stderr, "Variable out of range\n");
@@ -1062,7 +1101,7 @@ environment_get(const t_dono *dono, const t_case e, const t_case v)
 }
 
 static void
-environment_set(const t_dono *dono, const t_case e, const t_case v, const t_case d)
+env_set(const t_dono *dono, const t_case e, const t_case v, const t_case d)
 {
   if (v < 0 || v > mem[e + SLOT_LCHILD] - mem[e + SLOT_FCHILD])
     fprintf(stderr, "Variable out of range\n");
@@ -1071,7 +1110,7 @@ environment_set(const t_dono *dono, const t_case e, const t_case v, const t_case
 }
 
 static int
-environment_extend(t_dono *dono, const t_case *e, const unsigned int s, t_case *node)
+env_ext(t_dono *dono, const t_case *e, const unsigned int s, t_case *node)
 {
   t_case  old;
   t_case  ptr;
