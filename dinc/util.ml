@@ -34,3 +34,12 @@ let string_of prefix counter () =
   let name = (String.make 1 (char_of_int (int_of_char 'a' + (!counter mod 26)))) ^
              (if !counter >= 26 then (string_of_int (!counter / 26)) else "")
   in incr counter; prefix ^ name
+
+let explode s =
+  let rec aux acc = function
+    | -1 -> acc
+    | k -> aux (s.[k] :: acc) (k - 1)
+  in aux [] (String.length s - 1)
+
+let foldl f a l = List.fold_left f a l
+let foldr f a l = List.fold_right f l a
