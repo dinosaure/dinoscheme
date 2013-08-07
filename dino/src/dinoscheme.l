@@ -412,8 +412,8 @@ CODE  [\x00-\xFF]
   t_case  b;
   t_case  r;
 
-  a = mem[pop(dono, op) + SLOT_VALUE];
-  b = mem[pop(dono, op) + SLOT_VALUE];
+  a = pop(dono, op);
+  b = pop(dono, op);
 
   if (value(dono, (a == b) ? 1 : 0, &r) != OK)
     return (FAIL);
