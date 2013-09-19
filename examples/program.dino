@@ -2,7 +2,7 @@
 (define foldl (lambda (f a l) (if (empty l) a (foldl f (f a (hd l)) (tl l)))))
 (define foldr (lambda (f a l) (if (empty l) a (f (hd l) (foldr f a (tl l))))))
 (define iter  (lambda (f l) (if (empty l) () (begin (f (hd l)) (iter f (tl l))))))
-(define fact  (lambda (n) (let (f (lambda (n a) (if [n == 0] a (f [n - 1] [a * n])))) (f n 1))))
+(define fact  (lambda (n) (let (f (lambda (n a) (if [n = 0] a (f [n - 1] [a * n])))) (f n 1))))
 (define #str  (lambda (l) (iter (lambda (x) (#chr x)) l)))
 
 (define u (lambda (x) (begin (#num x) (#str "! = ") (#num (fact x)) (#chr '\n'))))
